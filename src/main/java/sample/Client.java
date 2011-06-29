@@ -8,21 +8,28 @@ public class Client {
 	}
 
 	public static void main(String[] args) {
-		System.out.println("startup");
-		new Client(new Service()).run();
-		System.out.println("shutdown");
+		System.out.println("+ starting..");
+		
+		Client client = new Client(new Service(
+				new ExceptionHandler() {
+
+					public String handleNoValException(ExceptionHandlerContext context) {
+						return context.handleException(new UseValRestart("restart using this"));
+//						return context.handleException(new LetUserChooseValRestart());
+					}
+				}
+				
+			));
+		
+			client.run();
+		
+		System.out.println("+ shutdown.");
 	}
 
 	public void run() {
-		String val;
-		try {
-			val = service.getVal();
+		String val = service.getVal();
 
-		} catch (NoValException e) {
-//			val = e.getContext().handleException(new UseValRestart("restart using this"));
-			val = e.getContext().handleException(new LetUserChooseValRestart());
-		}
 		System.out.println(val);
 	}
-	
+
 }

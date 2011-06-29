@@ -1,6 +1,12 @@
 package sample;
 
 public class Service {
+	
+	private ExceptionHandler exceptionHandler;
+
+	public Service(ExceptionHandler exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
+	}
 
 	private String m_val;
 
@@ -8,31 +14,27 @@ public class Service {
 		this.m_val = val;
 	}
 
-	public String getVal() throws NoValException {
+	public String getVal() {
 		final String val = m_val;
 
-		return new Context() {
+		if (val == null)
+			return exceptionHandler.handleNoValException(new ExceptionHandlerContext() {
 
-			public String getVal() throws NoValException {
-				if (val == null)
-					throw new NoValException(this);
-				return val;
-			}
+				public String handleException(UseValRestart r) {
+					return r.getVal();
+				}
 
-			public String handleException(UseValRestart r) {
-				return r.getVal();
-			}
+				public String handleException(LetUserChooseValRestart r) {
+					return showViewDialog();
+				}
 
-			public String handleException(LetUserChooseValRestart r) {
-				return showViewDialog();
-			}
-
-		}.getVal();
+			});
+		
+		return val;
 
 	}
 
 	private String showViewDialog() {
-		System.out.println("open dialog here");
 		return "dialog input data";
 	}
 
